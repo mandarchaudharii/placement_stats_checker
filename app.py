@@ -34,17 +34,27 @@ st.title("Company Eligibility Filter")
 def is_eligible(row):
     crit = str(row["Criteria"]).lower()
     branches = str(row["Branches"]).lower()
+
     try:
         cgpa_req = float(re.search(r'(\d+(\.\d+)?)\s*cgpa', crit).group(1))
     except:
         cgpa_req = 0
+
     try:
         bl_req = int(re.search(r'(\d+)\s*bl', crit).group(1))
     except:
         bl_req = 0 if "no bl" in crit else 99
-    perc_10_req = 0 if "10" not in crit else float(re.search(r'10th.*?(\d+)%?', crit).group(1))
-    perc_12_req = 0 if "12" not in crit else float(re.search(r'12th.*?(\d+)%?', crit).group(1))
-    
+
+    try:
+        perc_10_req = float(re.search(r'10(th)?[^0-9]*(\d+)', crit).group(2))
+    except:
+        perc_10_req = 0
+
+    try:
+        perc_12_req = float(re.search(r'12(th)?[^0-9]*(\d+)', crit).group(2))
+    except:
+        perc_12_req = 0
+
     return (
         cgpa >= cgpa_req and
         backlogs <= bl_req and
@@ -52,6 +62,7 @@ def is_eligible(row):
         perc_12 >= perc_12_req and
         branch.lower() in branches
     )
+
 
 # Filter and display
 if st.sidebar.button("Search Companies"):
