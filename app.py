@@ -45,15 +45,18 @@ def is_eligible(row):
     except:
         bl_req = 0 if "no bl" in crit else 99
 
-    try:
-        perc_10_req = float(re.search(r'10(th)?[^0-9]*(\d+)', crit).group(2))
-    except:
-        perc_10_req = 0
+    perc_10_req = 0
+    perc_12_req = 0
 
-    try:
-        perc_12_req = float(re.search(r'12(th)?[^0-9]*(\d+)', crit).group(2))
-    except:
-        perc_12_req = 0
+    # Find all percentages with what they apply to
+    for perc_match in re.finditer(r'(\d+(\.\d+)?)%\s*\((.*?)\)', crit):
+        perc_value = float(perc_match.group(1))
+        categories = perc_match.group(3)
+
+        if "10" in categories:
+            perc_10_req = max(perc_10_req, perc_value)
+        if "12" in categories or "diploma" in categories:
+            perc_12_req = max(perc_12_req, perc_value)
 
     return (
         cgpa >= cgpa_req and
@@ -62,7 +65,6 @@ def is_eligible(row):
         perc_12 >= perc_12_req and
         branch.lower() in branches
     )
-
 
 # Filter and display
 if st.sidebar.button("Search Companies"):
