@@ -45,18 +45,15 @@ def is_eligible(row):
     except:
         bl_req = 0 if "no bl" in crit else 99
 
-    perc_10_req = 0
-    perc_12_req = 0
+    try:
+        perc_10_req = float(re.search(r'10(th)?[^0-9]*(\d+)', crit).group(2))
+    except:
+        perc_10_req = 0
 
-    # Find all percentages with what they apply to
-    for perc_match in re.finditer(r'(\d+(\.\d+)?)%\s*\((.*?)\)', crit):
-        perc_value = float(perc_match.group(1))
-        categories = perc_match.group(3)
-
-        if "10" in categories:
-            perc_10_req = max(perc_10_req, perc_value)
-        if "12" in categories or "diploma" in categories:
-            perc_12_req = max(perc_12_req, perc_value)
+    try:
+        perc_12_req = float(re.search(r'12(th)?[^0-9]*(\d+)', crit).group(2))
+    except:
+        perc_12_req = 0
 
     return (
         cgpa >= cgpa_req and
@@ -66,20 +63,13 @@ def is_eligible(row):
         branch.lower() in branches
     )
 
+
 # Filter and display
 if st.sidebar.button("Search Companies"):
     df = data[year]
-    filtered = df[df.apply(is_eligible, axis=1)][["Company", "Offer", "Criteria", "Branches", "Profile"]]
-
+    filtered = df[df.apply(is_eligible, axis=1)][["Company", "Criteria", "Branches", "Profile"]]
     if not filtered.empty:
         st.success(f"Found {len(filtered)} eligible companies.")
-
-        # New Filter after results
-        offer_type = st.selectbox("Select Offer Type", ["All", "P", "I", "P+I"])
-        if offer_type != "All":
-            filtered = filtered[filtered["Offer"].str.strip().str.upper() == offer_type.upper()]
-
         st.dataframe(filtered.reset_index(drop=True))
-
     else:
         st.warning("No matching companies found.")
