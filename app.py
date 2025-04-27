@@ -69,9 +69,17 @@ def is_eligible(row):
 # Filter and display
 if st.sidebar.button("Search Companies"):
     df = data[year]
-    filtered = df[df.apply(is_eligible, axis=1)][["Company", "Criteria", "Branches", "Profile"]]
+    filtered = df[df.apply(is_eligible, axis=1)][["Company", "Offer", "Criteria", "Branches", "Profile"]]
+
     if not filtered.empty:
         st.success(f"Found {len(filtered)} eligible companies.")
+
+        # New Filter after results
+        offer_type = st.selectbox("Select Offer Type", ["All", "P", "I", "P+I"])
+        if offer_type != "All":
+            filtered = filtered[filtered["Offer"].str.strip().str.upper() == offer_type.upper()]
+
         st.dataframe(filtered.reset_index(drop=True))
+
     else:
         st.warning("No matching companies found.")
