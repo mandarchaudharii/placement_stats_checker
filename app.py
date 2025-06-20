@@ -5,7 +5,7 @@ import re
 # Load all tables
 @st.cache_data
 def load_data():
-    #xls = pd.ExcelFile("company_criteria.xlsx")
+    xls = pd.ExcelFile("company_criteria.xlsx")
     data = {
         "2022": xls.parse("Table 1", skiprows=1),
         "2023": xls.parse("Table 2", skiprows=1),
